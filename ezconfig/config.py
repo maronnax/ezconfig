@@ -133,3 +133,11 @@ class Configuration(object):
             ndx = string_value.find("#")
             string_value = string_value[:ndx].strip()
         return string_value
+
+configuration_file = None
+config = None
+
+def load_configuration_file(fn):
+    configuration_file = fn
+    config = Configuration(fn)
+    return
