@@ -18,7 +18,7 @@ def get_filename_relative_to_sentinal(path, sentinal, conf_filename):
 
 def get_best_filename(*array_of_filenames):
     for fn in array_of_filenames:
-        if os.path.isfile(fn):
+        if fn is not None and os.path.isfile(fn):
             return fn
     else:
         return None
