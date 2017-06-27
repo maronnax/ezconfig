@@ -11,9 +11,6 @@ from __future__ import unicode_literals
 from ConfigParser import ConfigParser
 import os
 
-import atlas.exceptions
-import local  # NOQA
-
 __author__ = "Nathan Addy <nathan.addy@gmail.com>"
 
 """
@@ -49,7 +46,8 @@ class Configuration(object):
         return self._conf.sections()
 
     def get(self, sect, key, default=False, mandatory=False,
-            type=False, is_filename=False, is_timedelta=False, raw=False):
+            type=False, is_filename=False, is_timedelta=False, raw=False,
+            is_code=False):
         '''Primary class method for reading values in the configuration file.
 
         Supports commenting, typecasting, default-values, mandatory
@@ -61,6 +59,8 @@ class Configuration(object):
         type - convert value to key_type
         is_filename - return absolute path for filename in sect::key
         is_timedelta - allow values like 3w or 3d 4h 13n 57s
+        is_code - Assume that this is a string representing a lambda object in python
+                  and that we can eval the value to product a function in python.
         raw - do not do any variable substitutions when extracting the value
         '''
 
@@ -80,6 +80,9 @@ class Configuration(object):
 
         if is_timedelta:
             value = Configuration._getBestSecondsFromConfigString(value)
+
+        if is_code:
+            value = eval(value)
 
         return value
 
@@ -133,11 +136,3 @@ class Configuration(object):
             ndx = string_value.find("#")
             string_value = string_value[:ndx].strip()
         return string_value
-
-configuration_file = None
-config = None
-
-def load_configuration_file(fn):
-    configuration_file = fn
-    config = Configuration(fn)
-    return

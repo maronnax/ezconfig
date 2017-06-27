@@ -1,4 +1,5 @@
 import os
+import pdb
 
 def get_userdir_filename(fn_basename):
     return os.path.expanduser("~/.{}".format(fn_basename))
@@ -16,7 +17,7 @@ def get_filename_relative_to_sentinal(path, sentinal, conf_filename):
     return None
 
 
-def get_best_filename(*array_of_filenames):
+def get_best_filename(array_of_filenames):
     for fn in array_of_filenames:
         if fn is not None and os.path.isfile(fn):
             return fn
