@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from ConfigParser import ConfigParser
+import dateutil.parser
 import os
 
 __author__ = "Nathan Addy <nathan.addy@gmail.com>"
@@ -46,7 +47,7 @@ class Configuration(object):
         return self._conf.sections()
 
     def get(self, sect, key, default=False, mandatory=False,
-            type=False, is_filename=False, is_timedelta=False, raw=False,
+            type=False, is_filename=False, is_timedelta=False, is_datetime=False, raw=False,
             is_code=False):
         '''Primary class method for reading values in the configuration file.
 
@@ -80,6 +81,9 @@ class Configuration(object):
 
         if is_timedelta:
             value = Configuration._getBestSecondsFromConfigString(value)
+
+        if is_datetime:
+            value = dateutil.parser.parse(value)
 
         if is_code:
             value = eval(value)
