@@ -19,6 +19,9 @@ Provide the Configuration class for the application
 """
 
 
+class MissingConfigurationKeyXcpt(KeyError):
+    pass
+
 class Configuration(object):
 
     '''Represents a configuration object that holds values in the form
@@ -36,7 +39,7 @@ class Configuration(object):
 
         if not os.path.isfile(fn):
             err_msg = "No such file: '{}' -> '{}'".format(fn, self.filename)
-            raise atlas.exceptions.MissingConfigurationFileXcpt(err_msg)
+            raise MissingConfigurationFileXcpt(err_msg)
 
         self._conf = ConfigParser()
         self._conf.read(self.filename)
@@ -67,7 +70,7 @@ class Configuration(object):
 
         if mandatory and not self.has(sect, key):
             err_msg = "Missing configuration exception '{0}::{1}'".format(sect, key)
-            raise atlas.exceptions.MissingConfigurationKeyXcpt(err_msg)
+            raise MissingConfigurationKeyXcpt(err_msg)
 
         value = default
         if self._conf.has_option(sect, key):
