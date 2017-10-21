@@ -1,8 +1,9 @@
 import os
-import pdb
+
 
 def get_userdir_filename(fn_basename):
-    return os.path.expanduser("~/.{}".format(fn_basename))
+    final_fn = os.path.abspath(os.path.expanduser("~/.{}".format(fn_basename)))
+    return final_fn
 
 
 def get_filename_relative_to_sentinal(path, sentinal, conf_filename):
