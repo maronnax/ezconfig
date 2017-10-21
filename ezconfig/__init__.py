@@ -1,6 +1,5 @@
 import os
 
-
 def get_userdir_filename(fn_basename):
     final_fn = os.path.abspath(os.path.expanduser("~/.{}".format(fn_basename)))
     return final_fn

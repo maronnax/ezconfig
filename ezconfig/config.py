@@ -9,8 +9,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from ConfigParser import ConfigParser
-import dateutil.parser
+import itertools
+import collections
 import os
+
+import dateutil.parser
 
 __author__ = "Nathan Addy <nathan.addy@gmail.com>"
 
@@ -18,8 +21,7 @@ __author__ = "Nathan Addy <nathan.addy@gmail.com>"
 Provide the Configuration class for the application
 """
 
-class MissingConfigurationKeyXcpt(KeyError):
-    pass
+MANDATORY_PLUS_DEFAULT_ERROR_MSG = "mandotory cannot be true while default is not None"
 
 class Configuration(object):
 
@@ -38,7 +40,7 @@ class Configuration(object):
 
         if not os.path.isfile(fn):
             err_msg = "No such file: '{}' -> '{}'".format(fn, self.filename)
-            raise MissingConfigurationFileXcpt(err_msg)
+            raise IOError(err_msg)
 
         self._conf = ConfigParser()
         self._conf.read(self.filename)
@@ -70,9 +72,12 @@ class Configuration(object):
         raw - do not do any variable substitutions when extracting the value
         '''
 
+        if mandatory and default is not None:
+            raise ValueError(MANDATORY_PLUS_DEFAULT_ERROR_MSG)
+
         if mandatory and not self.has(sect, key):
             err_msg = "Missing configuration exception '{0}::{1}'".format(sect, key)
-            raise MissingConfigurationKeyXcpt(err_msg)
+            raise KeyError(err_msg)
 
         if default is None:
             value_list = []
@@ -191,7 +196,7 @@ class ConfigurationSet(object):
     def sections(self):
         # Python doens't have an OrderedSet so I'm doing the same thing with an OrderedDict.
         section_dict = collections.OrderedDict()
-        for section in itertools.chain(*map(lambda ez: ez.sections(), self._config_list)):
+        for section in list(itertools.chain(*map(lambda ez: ez.sections(), self._config_list))):
             section_dict[section] = True
         return section_dict.keys()
 
@@ -199,9 +204,14 @@ class ConfigurationSet(object):
         # The only thing here is that we must keep track of
         # mandatory=True.  That makes things a little gross.
 
-        #embed(config=make_ipy_conf(), banner1="", exit_msg="")
+        if "mandatory" in kwds and "default" in kwds and kwds["mandatory"] and kwds["default"] is not None:
+            raise ValueError(MANDATORY_PLUS_DEFAULT_ERROR_MSG)
+
         section, key = args[:2]
-        potential_values = filter(lambda x: x, map(lambda conf: conf.get(*args, mandatory=False, **kwds), self._config_list))
+        potential_values = filter(
+            lambda x: x is not None,
+            map(lambda conf: conf.get(*args, **dict(kwds.items() + {"mandatory": False}.items())),
+                self._config_list))
 
         if potential_values:
             return potential_values[0]
@@ -209,6 +219,3 @@ class ConfigurationSet(object):
             return self._config_list[0].get(*args, **kwds) # This will throw if mandatory=True
     def has(sect, key):
         return True in map(lambda ez: ez.has(sect, key), self._config_list)
-
-    def sections(self):
-        return list(itertools.chain(*map(lambda conf: conf.sections(), self._config_list)))
