@@ -18,7 +18,6 @@ __author__ = "Nathan Addy <nathan.addy@gmail.com>"
 Provide the Configuration class for the application
 """
 
-
 class MissingConfigurationKeyXcpt(KeyError):
     pass
 
@@ -49,9 +48,10 @@ class Configuration(object):
         '''Return the configuration section titles'''
         return self._conf.sections()
 
-    def get(self, sect, key, default=False, mandatory=False,
-            type=False, is_filename=False, is_timedelta=False, is_datetime=False, raw=False,
-            is_code=False):
+    def get(self, sect, key, default=None, mandatory=False,
+            type=False, is_filename=False, is_timedelta=False, is_datetime=False,
+            is_list=False, raw=False, is_code=False):
+
         '''Primary class method for reading values in the configuration file.
 
         Supports commenting, typecasting, default-values, mandatory
@@ -63,6 +63,8 @@ class Configuration(object):
         type - convert value to key_type
         is_filename - return absolute path for filename in sect::key
         is_timedelta - allow values like 3w or 3d 4h 13n 57s
+        is_list - Assume the value is a "string" list: first the string will be split
+                  by ","; if set, each element is cast to `type` param.
         is_code - Assume that this is a string representing a lambda object in python
                   and that we can eval the value to product a function in python.
         raw - do not do any variable substitutions when extracting the value
@@ -72,26 +74,54 @@ class Configuration(object):
             err_msg = "Missing configuration exception '{0}::{1}'".format(sect, key)
             raise MissingConfigurationKeyXcpt(err_msg)
 
-        value = default
-        if self._conf.has_option(sect, key):
-            value = self._strip_comment(self._conf.get(sect, key, raw))
+        if default is None:
+            value_list = []
+        else:
+            value_list = [default]
 
-        if is_filename and value:
-            value = os.path.abspath(os.path.join(self.base_dir, value))
+        if self._conf.has_option(sect, key):
+            value_list = [self._strip_comment(self._conf.get(sect, key, raw))]
+
+        if is_list:
+            assert not is_code, "map(eval, string.split(','))...  You gotta be kidding."
+            assert False not in map(lambda elmt: isinstance(elmt, str), value_list)
+            assert len(value_list) <= 1
+
+            # Fix this up here as a special case so it doesn't leak all over.
+            if len(value_list) == 1 and value_list[0] == "":
+                value_list = []
+
+            if len(value_list):
+                value_list = map(lambda val: val.strip(), value_list[0].split(","))
+
+        if is_filename:
+            value_list = map(lambda val: os.path.abspath(os.path.join(self.base_dir, val)), value_list)
 
         if type:
-            value = type(value)
+            value_list = map(type, value_list)
 
         if is_timedelta:
-            value = Configuration._getBestSecondsFromConfigString(value)
+            value_list = map(lambda val: Configuration._getBestSecondsFromConfigString(val), value_list)
 
         if is_datetime:
-            value = dateutil.parser.parse(value)
+            value_list = map(lambda val: dateutil.parser.parse(val), value_list)
 
         if is_code:
-            value = eval(value)
+            value_list = map(eval, value_list)
 
-        return value
+        if not is_list:
+            return value_list[0] if value_list else default
+        else:
+            if value_list:
+                return value_list
+            else:
+                if default == "":
+                    return []
+                elif default is None:
+                    return None
+                else:
+                    value_list
+
 
     def has(self, sect, key):
         '''Check if sect::key is present in the config object'''
