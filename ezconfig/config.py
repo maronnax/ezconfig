@@ -39,7 +39,7 @@ class Configuration(object):
         self.base_dir = os.path.abspath(os.path.split(fn)[0])
 
         if not os.path.isfile(fn):
-            err_msg = "No such file: '{}' -> '{}'".format(fn, self.filename)
+            err_msg = "No such file: '{}'".format(self.filename)
             raise IOError(err_msg)
 
         self._conf = ConfigParser()
