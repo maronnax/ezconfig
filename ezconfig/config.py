@@ -173,3 +173,42 @@ class Configuration(object):
             ndx = string_value.find("#")
             string_value = string_value[:ndx].strip()
         return string_value
+
+class ConfigurationSet(object):
+    """configuration files and returns an ezconfig interface that treats
+    the files as most_significant to least significant.
+    """
+    def __init__(self, *config_fn_list):
+
+        # config_fn_lists is stored reversed so scan the files from
+        # most->least significant when we get() values.
+        self._config_fn_list = map(lambda fn: os.path.abspath(fn), config_fn_list)
+        self._config_list = map(lambda fn: Configuration(fn), self._config_fn_list)
+
+        self.config = Configuration(self._config_fn_list[1])
+        return
+
+    def sections(self):
+        # Python doens't have an OrderedSet so I'm doing the same thing with an OrderedDict.
+        section_dict = collections.OrderedDict()
+        for section in itertools.chain(*map(lambda ez: ez.sections(), self._config_list)):
+            section_dict[section] = True
+        return section_dict.keys()
+
+    def get(self, *args, **kwds):
+        # The only thing here is that we must keep track of
+        # mandatory=True.  That makes things a little gross.
+
+        #embed(config=make_ipy_conf(), banner1="", exit_msg="")
+        section, key = args[:2]
+        potential_values = filter(lambda x: x, map(lambda conf: conf.get(*args, mandatory=False, **kwds), self._config_list))
+
+        if potential_values:
+            return potential_values[0]
+        else:
+            return self._config_list[0].get(*args, **kwds) # This will throw if mandatory=True
+    def has(sect, key):
+        return True in map(lambda ez: ez.has(sect, key), self._config_list)
+
+    def sections(self):
+        return list(itertools.chain(*map(lambda conf: conf.sections(), self._config_list)))
