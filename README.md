@@ -1,12 +1,15 @@
-# EZ Config
+# EZConfig
 
 EZConfig is a package for parsing configuration files.
 
-## Insallation Instructions
+## Installation Instructions
 
 Install with pip using
+    ```pip install ezconfig```
 
-        pip install git+ssh://git@bitbucket.com/nathanaddy/ezconfig.git
+The latest development version is on bitbucket and you can install
+it using
+    ```pip install git+https://bitbucket.org/nathanaddy/ezconfig.git```
 
 ## Package Features
 
@@ -46,3 +49,13 @@ EZConfig provides three major features.
   one*and*only best or as a ConfigurationSet that uses them all
   together, using values from more-significant configuration
   directories.
+
+
+## Documentation
+
+Documentation is available at https://ezconfig.readthedocs.io/
+
+This documentation is build out of the ./doc directory and requires
+sphinx to build. You can view it locally by cd'ing to doc and
+executing `make html`.  Documentation will be in
+./doc/_build/html/index.html.
