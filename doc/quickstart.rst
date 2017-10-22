@@ -30,8 +30,8 @@ parse a single Configuration file at a time.
 
 This example uses a configuration file from the project repository referenced in examples/example1.conf
 
-Configuration file:
-~~~~~~~~~~~~~~~~~~~~
+Example Configuration file:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -64,48 +64,33 @@ method: default and mandatory, type, is_List, is_timedelta,
 is_datetime, and is_filename.
 
 >>> import ezconfig.config
-
 >>> conf = ezconfig.config.Configuration("examples/example1.conf")
-
 >>> print conf.get("section_one", "variable")
 first value
-
 >>> print conf.get("section_one", "names", is_list=True)
 [u'Tom', u'Dick', u'Harry']
-
 >>> print conf.get("section_one", "float_value", type=float)
 3.14
-
 >>> print conf.get("section_one", "float_value", type=float, is_list=True)
 [3.14]
-
 >>> print conf.get("section_one", "fibonnacci", type=int, is_list=True)
 [1, 2, 3, 4, 5]
-
 >>> print conf.get("section_one", "timedelta_1", is_timedelta=True)
 10.0
-
 >>> print conf.get("section_one", "timedelta_2", is_timedelta=True)
 204.0
-
 >>> print conf.get("section_one", "a_date", is_datetime=True)
 2017-12-30 04:14:00
-
 >>> print conf.get("section_one", "birthdays", is_datetime=True, is_list=True)
 [datetime.datetime(1975, 12, 30, 0, 0),
      datetime.datetime(1981, 3, 30, 0, 0),
      datetime.datetime(1980, 10, 10, 0, 0)]
-
 >>> print conf.get("section_one", "directory_of_conf_file", is_filename=True)
 /Users/nathan/Source/windfall/ezconfig/examples
-
 >>> print conf.get("section_one", "user_directory", is_filename=True)
 /Users/nathan
-
 >>> print conf.get("section_one", "missing_value", default="this is the default")
 this is the default
-
 >>> adder_function = conf.get("section_one", "adder", is_code=True)
-
 >>> print adder_function(10)
 20
