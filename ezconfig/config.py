@@ -100,8 +100,10 @@ class Configuration(object):
                 value_list = map(lambda val: val.strip(), value_list[0].split(","))
 
         if is_filename:
-            value_list = map(lambda val: os.path.abspath(os.path.join(self.base_dir, val)), value_list)
-
+            value_list = map(
+                lambda val: os.path.abspath(os.path.join(self.base_dir, os.path.expanduser(val))),
+                value_list
+            )
         if type:
             value_list = map(type, value_list)
 
