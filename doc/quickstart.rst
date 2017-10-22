@@ -25,31 +25,35 @@ EZConfig is installed using pip.
 Example
 =========
 
-The following example gives a quick example of
+The following example gives a quick example of how to use ezconfig to
+parse a single Configuration file at a time.
 
-
-This example uses a configuration file in examples/example1.conf
+This example uses a configuration file from the project repository referenced in examples/example1.conf
 
 Configuration file:
 ~~~~~~~~~~~~~~~~~~~~
-[section_one]
 
-variable = first value # Comments are automatically supported
-names = Tom, Dick, Harry
+.. code-block:: python
 
-float_value = 3.14
-fibonnacci = 1,2,3,4,5
 
-timedelta_1 = 10
-timedelta_2 = 3.4m
+   [section_one]
 
-a_date = 12/30/2017 4:14
-birthdays = 12/30/1975, Mar-30 1981, 1980-10-10
+   variable = first value # Comments are automatically supported
+   names = Tom, Dick, Harry
 
-directory_of_conf_file = .
-user_directory = ~
+   float_value = 3.14
+   fibonnacci = 1,2,3,4,5
 
-adder = lambda x: x+10
+   timedelta_1 = 10
+   timedelta_2 = 3.4m
+
+   a_date = 12/30/2017 4:14
+   birthdays = 12/30/1975, Mar-30 1981, 1980-10-10
+
+   directory_of_conf_file = .
+   user_directory = ~
+
+   adder = lambda x: x+10
 
 EZConfig example
 ~~~~~~~~~~~~~~~~~~~~
