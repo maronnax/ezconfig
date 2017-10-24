@@ -23,6 +23,12 @@ Provide the Configuration class for the application
 
 MANDATORY_PLUS_DEFAULT_ERROR_MSG = "mandotory cannot be true while default is not None"
 
+def _convert_to_integer(obj):
+  try:
+    return int(obj)
+  except ValueError:
+    return int(obj, 16)
+
 class Configuration(object):
 
     '''Represents a configuration object that holds values in the form
@@ -52,7 +58,7 @@ class Configuration(object):
 
     def get(self, sect, key, default=None, mandatory=False,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
-            is_list=False, raw=False, is_code=False):
+            is_list=False, raw=False, is_int_hex_str=False, is_code=False):
 
         '''Primary class method for reading values in the configuration file.
 
@@ -104,6 +110,9 @@ class Configuration(object):
                 lambda val: os.path.abspath(os.path.join(self.base_dir, os.path.expanduser(val))),
                 value_list
             )
+
+        if is_int_hex_str:
+            value_list = map(_convert_to_integer, value_list)
         if type:
             value_list = map(type, value_list)
 

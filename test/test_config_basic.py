@@ -66,11 +66,21 @@ class TestConfigBasic(unittest.TestCase):
         assert f(1) == 2
         assert config.get("conversions", "val11", raw=True) == "lambda x: x * 2"
 
+        assert config.get("conversions", "val_hex1", is_int_hex_str=True) == 10
+        assert config.get("conversions", "val_hex2", is_int_hex_str=True) == 16
+        assert config.get("conversions", "val_hex_array", is_list=True, is_int_hex_str=True) == [10, 16]
+
+        assert config.get("conversions", "key_val_type2_1") == "foo"
+        assert config.get("conversions", "key_val_type2_2", is_list=True, is_timedelta = True) == [1.0, 60.0, 3600.0]
+
+        assert config.get("conversions", "dont_do_this_you_idiot", is_code=True)(3) == 5
 
         assert config.get("conversions", "date1", is_datetime=True) == datetime(1981, 3, 30)
         assert config.get("conversions", "date2", is_datetime=True) == datetime(1981, 3, 30, 12, 15)
         assert config.get("conversions", "date3", is_datetime=True) == datetime(1981, 3, 30, 12, 13, 14)
         assert config.get("conversions", "date3") == "1981-03-30 12:13:14"
+
+
 
         return
 

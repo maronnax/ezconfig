@@ -6,13 +6,17 @@ Quickstart
 This file describes how one goes about installing and using ezconfig
 to solve a variety of common tasks such as searching for configuration
 files, looking through multiple configuration files for values, and
-parsing configuration values.
+parsing configuration values. It is built on top of Python's
+ConfigurationParser, so it works with the stuff that's already out
+there, and should be able to easily drop into your application.
 
 If you've spent too much of your life writing too many little parsers
 to read configuration strings, this library may help you save
 what little time you have left on this planet for more productive
 activities.
 
+Get rid of your stupid, "I'll just write this quick and fix it up good
+now" code and move on with your life!  ... with ezconfig!
 
 Installing
 =============
@@ -55,6 +59,11 @@ Example Configuration file:
 
    adder = lambda x: x+10
 
+   int_str_in_hex = 0x10
+   int_str_in_dec = 10
+
+   second_configuration_type: 2.72, 3.14 # Note second `key: value` format type
+
 EZConfig example
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -94,3 +103,10 @@ this is the default
 >>> adder_function = conf.get("section_one", "adder", is_code=True)
 >>> print adder_function(10)
 20
+>>> conf.get("section_one", "int_str_in_hex", is_int_hex_str=True)
+16
+>>> conf.get("section_one", "int_str_in_dec", is_int_hex_str=True)
+10
+>>> conf.get("section_one", "second_configuration_type", type=float, is_list=True)
+[2.72, 3.14]
+>>>
