@@ -56,6 +56,18 @@ class Configuration(object):
         '''Return the configuration section titles'''
         return self._conf.sections()
 
+    def variables(self):
+        '''Return a list of (section, keys) in the configuration file'''
+        return list(itertools.chain.from_iterable(map(lambda sec: (map(lambda (var,val): (sec, var),
+                                                                       self._conf.items(sec))),
+                                                      self._conf.sections())))
+
+    # Do not want to enable this for now, as this returns the raw values and is this not at all EZ.
+    # def items(self):
+    #     return list(itertools.chain.from_iterable(map(lambda sec: (map(lambda (var,val): (sec, var, val),
+    #                                                                    self._conf.items(sec))),
+    #                                                   self._conf.sections())))
+
     def get(self, sect, key, default=None, mandatory=False,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
             is_list=False, raw=False, is_int_hex_str=False, is_code=False):
@@ -75,6 +87,8 @@ class Configuration(object):
                   by ","; if set, each element is cast to `type` param.
         is_code - Assume that this is a string representing a lambda object in python
                   and that we can eval the value to product a function in python.
+        is_int_hex_str: This is a string that specifies an integer in either decimal
+                        or hex.  E.g. "193" (decimal) or "0xc1" both return the 193.
         raw - do not do any variable substitutions when extracting the value
         '''
 
@@ -211,6 +225,14 @@ class ConfigurationSet(object):
             section_dict[section] = True
         return section_dict.keys()
 
+    def variables(self):
+        variable_dict = collections.OrderedDict()
+        for section in list(itertools.chain(*map(lambda ez: ez.variables(), self._config_list))):
+            variable_dict[section] = True
+        return variable_dict.keys()
+
+
+
     def get(self, *args, **kwds):
         # The only thing here is that we must keep track of
         # mandatory=True.  That makes things a little gross.
@@ -228,5 +250,7 @@ class ConfigurationSet(object):
             return potential_values[0]
         else:
             return self._config_list[0].get(*args, **kwds) # This will throw if mandatory=True
+
+
     def has(sect, key):
         return True in map(lambda ez: ez.has(sect, key), self._config_list)
