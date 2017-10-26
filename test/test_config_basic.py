@@ -122,11 +122,7 @@ class TestConfigBasic(unittest.TestCase):
 
         assert config.get(SEC, "intervals", is_list=True, is_timedelta=True) == \
             [10.0, 10.1, 15, 15, 13*60, 1.5*3600, 10*24*3600, 15*7*24*3600]
-
-
-
         return
-
 
 
     def test_static_param(self):
@@ -137,3 +133,12 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get("static_stuff", "test_fn", static=True) == test_fn
         assert config.get("static_stuff", "test_file", static=True) == test_fn
         assert config.get("static_stuff", "test_var", static=True) == "../testdata/default.conf"
+
+
+
+    def test_help_comments(self):
+        test_fn = testdata.get_default_test_config_filename()
+        config = ezconfig.config.Configuration(test_fn)
+        config.get_key_help("some_help_comments", "string_list") == ""
+        config.get_key_help("some_help_comments", "dates") == ""
+        config.get_key_help("some_help_comments", "intervals") == "A help comment"

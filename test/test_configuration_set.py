@@ -118,3 +118,10 @@ def test_config_composion_interleaving():
     #     for (key, val) in answers.items():
     #         print "perm={}, key={}, val={}, ret={}".format(perm, key, val, config(*perm).get(key, "value"))
     #         assert config(*perm).get(key, "value") == val
+
+
+    perms = [(1,2,3), (2,3,1), (3,1,2), (2,1,3), (3,1,2)]
+
+    for p in perms:
+        assert config(*p).get_key_help("1and2", "value") == "A long and great help message"
+        assert config(*p).get_key_help("2and3", "value") == "A different help message only found once"

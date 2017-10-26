@@ -180,6 +180,15 @@ class ConfigurationFile(object):
         '''Check if sect::key is present in the config object'''
         return self._conf.has_option(sect, key)
 
+    def get_key_help(self, section, key):
+
+      if not self.has(section, key): return ""
+      value = self._conf.get(section, key)
+      if "##" not in value:
+        return ""
+      else:
+        return value[ value.index("##") + 2: ].strip()
+
     @staticmethod
     def _getBestSecondsFromConfigString(conf_string):
         '''
@@ -246,6 +255,13 @@ class Configuration(object):
             section_dict[section] = True
         return section_dict.keys()
 
+    def get_key_help(self, key, value):
+      # Trying this unusual heuristic to get over the fact that the
+      # more recent files in rare cases will have better comments; in
+      # others the older files.  So we call the longest help the best help.
+      ret = sorted(map(lambda conf: conf.get_key_help(key, value), self._config_list), key=len)[-1]
+      return ret
+
     def variables(self):
         variable_dict = collections.OrderedDict()
         for section in list(itertools.chain(*map(lambda ez: ez.variables(), self._config_list))):
@@ -276,5 +292,3 @@ class Configuration(object):
 
     def has(sect, key):
         return True in map(lambda ez: ez.has(sect, key), self._config_list)
-
-# Configuration = ConfigurationSet
