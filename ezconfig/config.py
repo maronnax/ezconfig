@@ -30,7 +30,7 @@ def _convert_to_integer(obj):
   except ValueError:
     return int(obj, 16)
 
-class Configuration(object):
+class ConfigurationFile(object):
 
     '''Represents a configuration object that holds values in the form
     section::key.
@@ -154,7 +154,7 @@ class Configuration(object):
             value_list = map(type, value_list)
 
         if is_timedelta:
-            value_list = map(lambda val: Configuration._getBestSecondsFromConfigString(val), value_list)
+            value_list = map(lambda val: ConfigurationFile._getBestSecondsFromConfigString(val), value_list)
 
         if is_datetime:
             value_list = map(lambda val: dateutil.parser.parse(val), value_list)
@@ -227,18 +227,15 @@ class Configuration(object):
             string_value = string_value[:ndx].strip()
         return string_value
 
-class ConfigurationSet(object):
-    """configuration files and returns an ezconfig interface that treats
-    the files as most_significant to least significant.
+class Configuration(object):
+    """takes a list of configuration files and returns an ezconfig
+    interface that treats the files as most_significant to least
+    significant.
     """
     def __init__(self, *config_fn_list):
 
-        # config_fn_lists is stored reversed so scan the files from
-        # most->least significant when we get() values.
         self._config_fn_list = map(lambda fn: os.path.abspath(fn), config_fn_list)
-        self._config_list = map(lambda fn: Configuration(fn), self._config_fn_list)
-
-        self.config = Configuration(self._config_fn_list[1])
+        self._config_list = map(lambda fn: ConfigurationFile(fn), self._config_fn_list)
 
         return
 
@@ -279,3 +276,5 @@ class ConfigurationSet(object):
 
     def has(sect, key):
         return True in map(lambda ez: ez.has(sect, key), self._config_list)
+
+# Configuration = ConfigurationSet

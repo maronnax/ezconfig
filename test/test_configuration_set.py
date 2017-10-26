@@ -16,9 +16,9 @@ def test_config_composion_interleaving():
     def make_permutation_generator(*filenames):
         def instantiation_permutation(*args):
             if len(args) == 0: # Set the default case as the identity permutation.
-                return ezconfig.config.ConfigurationSet(*filenames)
+                return ezconfig.config.Configuration(*filenames)
             args = [(x-1) for x in args] # Make zero indexed
-            return ezconfig.config.ConfigurationSet(*[filenames[ndx] for ndx in args])
+            return ezconfig.config.Configuration(*[filenames[ndx] for ndx in args])
         return instantiation_permutation
 
     def make_answer_key_generator(answers, *values):
