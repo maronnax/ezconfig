@@ -126,3 +126,14 @@ class TestConfigBasic(unittest.TestCase):
 
 
         return
+
+
+
+    def test_static_param(self):
+        test_fn = testdata.get_default_test_config_filename()
+        config = ezconfig.config.Configuration(test_fn)
+
+        assert config.get("static_stuff", "test_fn", raw=True) == "../testdata/default.conf"
+        assert config.get("static_stuff", "test_fn", static=True) == test_fn
+        assert config.get("static_stuff", "test_file", static=True) == test_fn
+        assert config.get("static_stuff", "test_var", static=True) == "../testdata/default.conf"

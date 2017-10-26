@@ -22,6 +22,7 @@ Provide the Configuration class for the application
 """
 
 MANDATORY_PLUS_DEFAULT_ERROR_MSG = "mandotory cannot be true while default is not None"
+STATIC_WITH_OTHER_PARAMS_ERROR_MSG = "static=True must not be passed with other parameters"
 
 def _convert_to_integer(obj):
   try:
@@ -43,6 +44,7 @@ class Configuration(object):
     def __init__(self, fn):
         self.filename = os.path.abspath(fn)
         self.base_dir = os.path.abspath(os.path.split(fn)[0])
+        self.static_filename_key_indicators = ["_fn", "_file"]
 
         if not os.path.isfile(fn):
             err_msg = "No such file: '{}'".format(self.filename)
@@ -71,7 +73,7 @@ class Configuration(object):
 
     def get(self, sect, key, default=None, mandatory=False,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
-            is_list=False, raw=False, is_int_hex_str=False, is_code=False):
+            is_list=False, raw=False, is_int_hex_str=False, is_code=False, static=False):
 
         '''Primary class method for reading values in the configuration file.
 
@@ -91,11 +93,18 @@ class Configuration(object):
         is_int_hex_str: This is a string that specifies an integer in either decimal
                         or hex.  E.g. "193" (decimal) or "0xc1" both return the 193.
         raw - do not do any variable substitutions when extracting the value
+
+        static - if set to true the class will act as though the field is raw unless the key
+                 matches `static_filename_key_indicators`, in which case filename=True is used.
         '''
 
         # NJA-TAG Change this
         if mandatory and default is not None:
             raise ValueError(MANDATORY_PLUS_DEFAULT_ERROR_MSG)
+
+        if static == True and filter(lambda x: False, (type, is_filename, is_timedelta, is_code,
+                                                       is_int_hex_str, raw)):
+            raise ValueError(STATIC_WITH_OTHER_PARAMS_ERROR_MSG)
 
         if mandatory and not self.has(sect, key):
             err_msg = "Missing configuration exception '{0}::{1}'".format(sect, key)
@@ -107,8 +116,15 @@ class Configuration(object):
         else:
             value = self._conf.get(sect, key)
 
+        if static:
+            if filter(lambda fnend: key.strip().endswith(fnend), self.static_filename_key_indicators):
+                return self.parse_string(value, is_filename = True)
+            else:
+                return self._strip_comment(value)
+
         return self.parse_string(value, type, is_filename, is_timedelta, is_datetime,
                                  is_list, raw, is_int_hex_str, is_code)
+
 
     def parse_string(self, value, type=False, is_filename=False, is_timedelta=False, is_datetime=False,
                      is_list=False, raw=False, is_int_hex_str=False, is_code=False):
@@ -223,6 +239,7 @@ class ConfigurationSet(object):
         self._config_list = map(lambda fn: Configuration(fn), self._config_fn_list)
 
         self.config = Configuration(self._config_fn_list[1])
+
         return
 
     def sections(self):
@@ -238,7 +255,8 @@ class ConfigurationSet(object):
             variable_dict[section] = True
         return variable_dict.keys()
 
-
+    def parse_string(self, *args, **kwds):
+        return self._config_list[0].parse_string(*args, **kwds)
 
     def get(self, *args, **kwds):
         # The only thing here is that we must keep track of
