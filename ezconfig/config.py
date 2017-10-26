@@ -68,6 +68,7 @@ class Configuration(object):
     #                                                                    self._conf.items(sec))),
     #                                                   self._conf.sections())))
 
+
     def get(self, sect, key, default=None, mandatory=False,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
             is_list=False, raw=False, is_int_hex_str=False, is_code=False):
@@ -92,6 +93,7 @@ class Configuration(object):
         raw - do not do any variable substitutions when extracting the value
         '''
 
+        # NJA-TAG Change this
         if mandatory and default is not None:
             raise ValueError(MANDATORY_PLUS_DEFAULT_ERROR_MSG)
 
@@ -99,25 +101,30 @@ class Configuration(object):
             err_msg = "Missing configuration exception '{0}::{1}'".format(sect, key)
             raise KeyError(err_msg)
 
-        if default is None:
-            value_list = []
+        if not self.has(sect, key):
+            value = default
+            if value is None: return
         else:
-            value_list = [default]
+            value = self._conf.get(sect, key)
 
-        if self._conf.has_option(sect, key):
-            value_list = [self._strip_comment(self._conf.get(sect, key, raw))]
+        return self.parse_string(value, type, is_filename, is_timedelta, is_datetime,
+                                 is_list, raw, is_int_hex_str, is_code)
+
+    def parse_string(self, value, type=False, is_filename=False, is_timedelta=False, is_datetime=False,
+                     is_list=False, raw=False, is_int_hex_str=False, is_code=False):
+
+        # Because of the refactor the caller can potentially put a default value in here and
+        # we need to handle it.
+        if isinstance(value, str):
+            value = self._strip_comment(value)
 
         if is_list:
-            assert not is_code, "map(eval, string.split(','))...  You gotta be kidding."
-            assert False not in map(lambda elmt: isinstance(elmt, str), value_list)
-            assert len(value_list) <= 1
-
-            # Fix this up here as a special case so it doesn't leak all over.
-            if len(value_list) == 1 and value_list[0] == "":
+            if value == "" or value == "()" or value == "[]":
                 value_list = []
-
-            if len(value_list):
-                value_list = map(lambda val: val.strip(), value_list[0].split(","))
+            else:
+                value_list = map(lambda str: str.strip(), value.split(","))
+        else:
+            value_list = [value]
 
         if is_filename:
             value_list = map(
@@ -145,12 +152,12 @@ class Configuration(object):
             if value_list:
                 return value_list
             else:
-                if default == "":
+                if value == "":
                     return []
-                elif default is None:
+                elif value is None:
                     return None
                 else:
-                    value_list
+                    return value_list
 
 
     def has(self, sect, key):
