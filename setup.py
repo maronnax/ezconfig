@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="ezconfig",
-      version="1.2.1",
+      version="1.2.2",
       description="Utility class for reading configuration files.",
       author="Nathan Addy",
       author_email="nathan.addy@windfalltechnical.com",
