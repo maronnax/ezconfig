@@ -100,10 +100,6 @@ class ConfigurationFile(object):
                  matches `STATIC_FILENAME_KEY_INDICATORS`, in which case filename=True is used.
         '''
 
-        # NJA-TAG Change this
-        if mandatory and default is not None:
-            raise ValueError(MANDATORY_PLUS_DEFAULT_ERROR_MSG)
-
         if static == True and filter(lambda x: False, (type, is_filename, is_timedelta, is_code,
                                                        is_int_hex_str, raw)):
             raise ValueError(STATIC_WITH_OTHER_PARAMS_ERROR_MSG)
