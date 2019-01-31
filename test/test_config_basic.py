@@ -145,3 +145,37 @@ class TestConfigBasic(unittest.TestCase):
         config.get_key_help("some_help_comments", "string_list") == ""
         config.get_key_help("some_help_comments", "dates") == ""
         config.get_key_help("some_help_comments", "intervals") == "A help comment"
+
+
+    def test_boolean_values(self):
+        test_fn = testdata.get_default_test_config_filename()
+        config = ezconfig.config.Configuration(test_fn)
+
+        SECTION = "boolean_values"
+
+        assert config.get(SECTION, "key_false_as_int", type=bool) == False
+        assert config.get(SECTION, "key_true_as_int", type=bool) == True
+        assert config.get(SECTION, "key_true", type=bool) == True
+        assert config.get(SECTION, "key_True", type=bool) == True
+        assert config.get(SECTION, "key_t", type=bool) == True
+        assert config.get(SECTION, "key_T", type=bool) == True
+
+        with self.assertRaises(ValueError):
+            assert config.get(SECTION, "key_misspelled_true", type=bool) == False
+
+        with self.assertRaises(ValueError):
+            assert config.get(SECTION, "key_misspelled_false", type=bool) == False
+
+        with self.assertRaises(ValueError):
+            assert config.get(SECTION, "key_blank_contents", type=bool) == False
+
+        assert config.get(SECTION, "key_false", type=bool) == False
+        assert config.get(SECTION, "key_False", type=bool) == False
+        assert config.get(SECTION, "key_f", type=bool) == False
+        assert config.get(SECTION, "key_F", type=bool) == False
+
+        assert config.get(SECTION, "key_float_zero_is_false", type=bool) == False
+        assert config.get(SECTION, "key_float_one_is_true", type=bool) == True
+        assert config.get(SECTION, "key_negative_float_is_true", type=bool) == True
+
+        return

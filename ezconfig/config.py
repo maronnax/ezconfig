@@ -32,6 +32,13 @@ def _convert_to_integer(obj):
   except ValueError:
     return int(obj, 16)
 
+def _convert_string_to_bool(string):
+  if string.lower() in ["t", "f", "true", "false"]:
+    return string.lower()[0] == "t"
+  else:
+    return float(string) != 0.0
+
+
 STATIC_FILENAME_KEY_INDICATORS = ["_fn", "_file"]
 class ConfigurationFile(object):
 
@@ -85,7 +92,8 @@ class ConfigurationFile(object):
         sect, key - str, section and key to look up value
         default - value returned if sect::key does not exist in the config file
         mandatory - raises exception if sect::key is not present
-        type - convert value to key_type
+        type - convert value to key_type; type=boolean has special handling for strings
+               representing boolean values
         is_filename - return absolute path for filename in sect::key
         is_timedelta - allow values like 3w or 3d 4h 13n 57s
         is_list - Assume the value is a "string" list: first the string will be split
@@ -148,8 +156,10 @@ class ConfigurationFile(object):
 
         if is_int_hex_str:
             value_list = map(_convert_to_integer, value_list)
-        if type:
-            value_list = map(type, value_list)
+        if type and type != bool:
+          value_list = map(type, value_list)
+        if type and type == bool:
+          value_list = map(_convert_string_to_bool, value_list)
 
         if is_timedelta:
             value_list = map(lambda val: ConfigurationFile._getBestSecondsFromConfigString(val), value_list)
