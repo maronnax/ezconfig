@@ -1,4 +1,4 @@
-include ./doc/Makefile
+#include ./doc/Makefile
 
 test:
 	nosetests -s test
