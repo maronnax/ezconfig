@@ -12,6 +12,8 @@ from ConfigParser import ConfigParser
 import itertools
 import collections
 import os
+import sys
+import re
 
 import dateutil.parser
 
@@ -30,6 +32,7 @@ def _convert_to_integer(obj):
   except ValueError:
     return int(obj, 16)
 
+STATIC_FILENAME_KEY_INDICATORS = ["_fn", "_file"]
 class ConfigurationFile(object):
 
     '''Represents a configuration object that holds values in the form
@@ -44,7 +47,6 @@ class ConfigurationFile(object):
     def __init__(self, fn):
         self.filename = os.path.abspath(fn)
         self.base_dir = os.path.abspath(os.path.split(fn)[0])
-        self.static_filename_key_indicators = ["_fn", "_file"]
 
         if not os.path.isfile(fn):
             err_msg = "No such file: '{}'".format(self.filename)
@@ -95,7 +97,7 @@ class ConfigurationFile(object):
         raw - do not do any variable substitutions when extracting the value
 
         static - if set to true the class will act as though the field is raw unless the key
-                 matches `static_filename_key_indicators`, in which case filename=True is used.
+                 matches `STATIC_FILENAME_KEY_INDICATORS`, in which case filename=True is used.
         '''
 
         # NJA-TAG Change this
@@ -117,7 +119,7 @@ class ConfigurationFile(object):
             value = self._conf.get(sect, key)
 
         if static:
-            if filter(lambda fnend: key.strip().endswith(fnend), self.static_filename_key_indicators):
+            if filter(lambda fnend: key.strip().endswith(fnend), STATIC_FILENAME_KEY_INDICATORS):
                 return self.parse_string(value, is_filename = True)
             else:
                 return self._strip_comment(value)
@@ -187,7 +189,11 @@ class ConfigurationFile(object):
       if "##" not in value:
         return ""
       else:
-        return value[ value.index("##") + 2: ].strip()
+        help_key = value[ value.index("##") + 2: ].strip()
+
+        help_key = help_key.replace("##", "")
+        help_key = re.sub("\W+", " ", help_key)
+        return help_key
 
     @staticmethod
     def _getBestSecondsFromConfigString(conf_string):
@@ -292,3 +298,75 @@ class Configuration(object):
 
     def has(sect, key):
         return True in map(lambda ez: ez.has(sect, key), self._config_list)
+
+
+class ConfiguredApplication(object):
+
+    DEFAULT_LOG_FORMAT = "%(levelname)s %(asctime)-15s %(name)s: %(message)s"
+
+    def __init__(self, arg_parser):
+        self.arg_parser = arg_parser # We own this now.
+
+        self.arg_parser.add_argument("config_list", nargs="+")
+        (args, opts) = self.arg_parser.parse_known_args(filter(lambda x: x!="--help", sys.argv[1:]))
+
+        # We reverse it so the "little-endian" specification of the shell: default, system, user
+        # will be replaced by the "big-endian" specification of function: check user, then system, then default.
+        self.config = Configuration(*reversed(args.config_list))
+
+        self._add_arguments()
+
+        self.opts = self.arg_parser.parse_args()
+        self._parse_class_options()
+
+    def _add_arguments(self, conf_variables=None):
+      if conf_variables == None:
+        conf_variables = self.config.variables()
+
+        for (section, key) in conf_variables:
+            # The static param indicates that filename variables are
+            # to be considered statically typed and identified from
+            # the key name, deduced from whether the key name
+            # ends with "_file" (one of the default patterns in
+            # ezconfig).
+
+            # This buys us the ability to set the absolute path as the
+            # default, so the user sees a useful value, as opposed to
+            # a potentially relative path in a file the user has no
+            # way of knowing.
+            config_val = self.config.get(section, key, static=True)
+            self.arg_parser.add_argument(self.config_arg_param_arg_name(section, key),
+                                         dest=self.config_arg_param_var_name(section, key),
+                                         default=config_val,
+                                         help = "{} (Default: {})".format(self.config.get_key_help(section, key), config_val))
+
+        # for (section, key) in self.config.variables():
+        #     self.arg_parser.add_argument("--{}/{}".format(section, key),
+        #                                  default=self.config.get(section, key),
+        #                                  help = self.config.get_key_help(section, key))
+        return
+
+    def config_arg_param_arg_name(self, section, key):
+        return "--{}/{}".format(section, key)
+
+    def config_arg_param_var_name(self, section, key):
+        return "{}___{}".format(section, key) # 3 underscores *just in case* someone uses 2 underscores in
+                                              # a configuration variable somewhere.
+
+
+    def get_param_value(self, section, key, **kwds):
+        # We capture this value because the configuration has already
+        # reported in absolute path the value it holds. So if we get a
+        # relative path, it comes from the command line and should be
+        # relative to getcwd.
+
+        rawstr = vars(self.opts)[self.config_arg_param_var_name(section, key)]
+
+        if "is_filename" in kwds:
+            kwds.pop("is_filename")
+            value = self.config.parse_string(rawstr, **kwds)
+            value = os.path.abspath(value)
+        else:
+            value = self.config.parse_string(rawstr, **kwds)
+
+        return value
