@@ -1,4 +1,7 @@
 import os
+from .config import Configuration
+from .config import ConfigurationFile
+
 
 def get_userdir_filename(fn_basename):
     final_fn = os.path.abspath(os.path.expanduser("~/.{}".format(fn_basename)))
