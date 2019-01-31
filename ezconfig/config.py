@@ -73,7 +73,7 @@ class ConfigurationFile(object):
     #                                                   self._conf.sections())))
 
 
-    def get(self, sect, key, default=None, mandatory=False,
+    def get(self, sect, key, default=None, mandatory=True,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
             is_list=False, raw=False, is_int_hex_str=False, is_code=False, static=False):
 
@@ -281,8 +281,13 @@ class Configuration(object):
         # The only thing here is that we must keep track of
         # mandatory=True.  That makes things a little gross.
 
-        if "mandatory" in kwds and "default" in kwds and kwds["mandatory"] and kwds["default"] is not None:
-            raise ValueError(MANDATORY_PLUS_DEFAULT_ERROR_MSG)
+        if "default" in kwds and "mandatory" not in kwds:
+          kwds["mandatory"] = False
+
+        # Handle mandatory as a special case
+        if kwds.get("mandatory", False):
+          if not True in [c.has(*args) for c in self._config_list]:
+            self._config_list[0].get(*args, mandatory=True)
 
         section, key = args[:2]
         potential_values = filter(

@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 
-import pdb
 import ezconfig.config
 #from nose.tools import assert_raises # Not working for some reason
 import testdata
@@ -26,7 +25,8 @@ class TestConfigBasic(unittest.TestCase):
         SEC = "basic"
         MISSING_KEY = "no bueno"
 
-        assert config.get(SEC, MISSING_KEY) is None
+        assert config.get(SEC, MISSING_KEY, default=None) is None
+        assert config.get(SEC, MISSING_KEY, mandatory=False) is None
         assert config.get(SEC, MISSING_KEY, default="DEFAULT") == "DEFAULT"
 
         assert config.get(SEC, MISSING_KEY, default="1.0", type=float) == 1.0
@@ -38,8 +38,9 @@ class TestConfigBasic(unittest.TestCase):
         with self.assertRaises(KeyError):
             config.get("conversions", MISSING_KEY, mandatory=True)
 
-        with self.assertRaises(ValueError):
-            config.get("conversions", MISSING_KEY, mandatory=True, default="Default should throw an exception")
+        with self.assertRaises(KeyError):
+            # mandatory=True has precedence over default value
+            assert config.get("conversions", MISSING_KEY, mandatory=True, default=1)
 
         assert config.get(SEC, MISSING_KEY, default=".", is_filename=True) == \
             os.path.join(os.path.split(__file__)[0], "testdata")
@@ -107,8 +108,10 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get(SEC, "string_list", is_list=True) == ["jesus", "mary", "joseph"]
         assert config.get(SEC, "float_list", is_list=True, type=float) == [1.2, 3.14, 5.19]
 
-        assert config.get(SEC, "WTF", is_list=True) is None
-        assert config.get(SEC, "WTF", is_list=True, type=int) is None
+        assert config.get(SEC, "WTF", is_list=True, default=None) is None
+        assert config.get(SEC, "WTF", is_list=True, mandatory=False) is None
+        assert config.get(SEC, "WTF", is_list=True, type=int, default=None) is None
+        assert config.get(SEC, "WTF", is_list=True, type=int, mandatory=False) is None
         assert config.get(SEC, "WTF", is_list=True, default="1,2,3") == ["1", "2", "3"]
         assert config.get(SEC, "WTF", is_list=True, default="1,2,3", type=int) == [1,2,3]
 

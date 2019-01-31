@@ -80,13 +80,13 @@ def test_config_composion_interleaving():
         config().get("conversions", MISSING_KEY, mandatory=True)
 
 
-    with assert_raises(ValueError):
+    with assert_raises(KeyError):
         config().get("conversions", MISSING_KEY,
                  default="Mandatory is mandatory dude.",
                  mandatory=True)
 
-    MISSING_SECTION="this bit isn't in the documentation!"
-    MISSING_KEY="where was that scrap of paper I wrote the keys on"
+    MISSING_SECTION="missing section"
+    MISSING_KEY="missing key"
 
     assert config().get("common", "value", mandatory=True) == "conf1_val"
     assert config().get("2and3", "value", mandatory=True) == "conf2_val"
@@ -96,7 +96,7 @@ def test_config_composion_interleaving():
     with assert_raises(KeyError):
         config().get(MISSING_SECTION, MISSING_KEY, mandatory=True)
 
-    with assert_raises(ValueError):
+    with assert_raises(KeyError):
         config().get(MISSING_SECTION, MISSING_KEY, mandatory=True, default="a thing")
 
     answers = {
