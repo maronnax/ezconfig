@@ -9,6 +9,6 @@ setup(name="ezconfig",
       license="MIT",
       packages=["ezconfig"],
       install_requires = ["dateutils"],
-      python_requires='<3.0',
+      python_requires='>3.6.0',
       zip_safe=False
 )

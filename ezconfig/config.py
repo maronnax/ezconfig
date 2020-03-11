@@ -1,14 +1,6 @@
-# Copyright (C) Windfall Technology - All Rights Reserved
-# Unauthorized copying of this file, via any medium is strictly prohibited
-# Proprietary and confidential
+# Copyright (C) Windfall Technology
 
-# Python 3 compatibility.
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import itertools
 import collections
 import os
@@ -59,7 +51,7 @@ class ConfigurationFile(object):
             err_msg = "No such file: '{}'".format(self.filename)
             raise IOError(err_msg)
 
-        self._conf = ConfigParser()
+        self._conf = ConfigParser(strict=False)
         self._conf.read(self.filename)
         return
 
@@ -69,7 +61,7 @@ class ConfigurationFile(object):
 
     def variables(self):
         '''Return a list of (section, keys) in the configuration file'''
-        return list(itertools.chain.from_iterable(map(lambda sec: (map(lambda (var,val): (sec, var),
+        return list(itertools.chain.from_iterable(map(lambda sec: (map(lambda varval: (sec, varval[0]),
                                                                        self._conf.items(sec))),
                                                       self._conf.sections())))
 
@@ -108,8 +100,9 @@ class ConfigurationFile(object):
                  matches `STATIC_FILENAME_KEY_INDICATORS`, in which case filename=True is used.
         '''
 
-        if static == True and filter(lambda x: False, (type, is_filename, is_timedelta, is_code,
-                                                       is_int_hex_str, raw)):
+        # NJA-TAG check this...
+        if static == True and [x for x in (type, is_filename, is_timedelta, is_code,
+                                                       is_int_hex_str, raw) if False]:
             raise ValueError(STATIC_WITH_OTHER_PARAMS_ERROR_MSG)
 
         if mandatory and not self.has(sect, key):
@@ -123,7 +116,7 @@ class ConfigurationFile(object):
             value = self._conf.get(sect, key)
 
         if static:
-            if filter(lambda fnend: key.strip().endswith(fnend), STATIC_FILENAME_KEY_INDICATORS):
+            if [fnend for fnend in STATIC_FILENAME_KEY_INDICATORS if key.strip().endswith(fnend)]:
                 return self.parse_string(value, is_filename = True)
             else:
                 return self._strip_comment(value)
@@ -144,31 +137,28 @@ class ConfigurationFile(object):
             if value == "" or value == "()" or value == "[]":
                 value_list = []
             else:
-                value_list = map(lambda str: str.strip(), value.split(","))
+                value_list = [str.strip() for str in value.split(",")]
         else:
             value_list = [value]
 
         if is_filename:
-            value_list = map(
-                lambda val: os.path.abspath(os.path.join(self.base_dir, os.path.expanduser(val))),
-                value_list
-            )
+            value_list = [os.path.abspath(os.path.join(self.base_dir, os.path.expanduser(val))) for val in value_list]
 
         if is_int_hex_str:
-            value_list = map(_convert_to_integer, value_list)
+            value_list = list(map(_convert_to_integer, value_list))
         if type and type != bool:
-          value_list = map(type, value_list)
+          value_list = list(map(type, value_list))
         if type and type == bool:
-          value_list = map(_convert_string_to_bool, value_list)
+          value_list = list(map(_convert_string_to_bool, value_list))
 
         if is_timedelta:
-            value_list = map(lambda val: ConfigurationFile._getBestSecondsFromConfigString(val), value_list)
+            value_list = [ConfigurationFile._getBestSecondsFromConfigString(val) for val in value_list]
 
         if is_datetime:
-            value_list = map(lambda val: dateutil.parser.parse(val), value_list)
+            value_list = [dateutil.parser.parse(val) for val in value_list]
 
         if is_code:
-            value_list = map(eval, value_list)
+            value_list = list(map(eval, value_list))
 
         if not is_list:
             return value_list[0] if value_list else default
@@ -255,30 +245,30 @@ class Configuration(object):
     """
     def __init__(self, *config_fn_list):
 
-        self._config_fn_list = map(lambda fn: os.path.abspath(fn), config_fn_list)
-        self._config_list = map(lambda fn: ConfigurationFile(fn), self._config_fn_list)
+        self._config_fn_list = [os.path.abspath(fn) for fn in config_fn_list]
+        self._config_list = [ConfigurationFile(fn) for fn in self._config_fn_list]
 
         return
 
     def sections(self):
         # Python doens't have an OrderedSet so I'm doing the same thing with an OrderedDict.
         section_dict = collections.OrderedDict()
-        for section in list(itertools.chain(*map(lambda ez: ez.sections(), self._config_list))):
+        for section in list(itertools.chain(*[ez.sections() for ez in self._config_list])):
             section_dict[section] = True
-        return section_dict.keys()
+        return list(section_dict.keys())
 
     def get_key_help(self, key, value):
       # Trying this unusual heuristic to get over the fact that the
       # more recent files in rare cases will have better comments; in
       # others the older files.  So we call the longest help the best help.
-      ret = sorted(map(lambda conf: conf.get_key_help(key, value), self._config_list), key=len)[-1]
+      ret = sorted([conf.get_key_help(key, value) for conf in self._config_list], key=len)[-1]
       return ret
 
     def variables(self):
         variable_dict = collections.OrderedDict()
-        for section in list(itertools.chain(*map(lambda ez: ez.variables(), self._config_list))):
+        for section in list(itertools.chain(*[ez.variables() for ez in self._config_list])):
             variable_dict[section] = True
-        return variable_dict.keys()
+        return list(variable_dict.keys())
 
     def parse_string(self, *args, **kwds):
         return self._config_list[0].parse_string(*args, **kwds)
@@ -296,10 +286,7 @@ class Configuration(object):
             self._config_list[0].get(*args, mandatory=True)
 
         section, key = args[:2]
-        potential_values = filter(
-            lambda x: x is not None,
-            map(lambda conf: conf.get(*args, **dict(kwds.items() + {"mandatory": False}.items())),
-                self._config_list))
+        potential_values = [x for x in [conf.get(*args, **dict(list(kwds.items()) + list({"mandatory": False}.items()))) for conf in self._config_list] if x is not None]
 
         if potential_values:
             return potential_values[0]
@@ -308,7 +295,7 @@ class Configuration(object):
 
 
     def has(sect, key):
-        return True in map(lambda ez: ez.has(sect, key), self._config_list)
+        return True in [ez.has(sect, key) for ez in self._config_list]
 
 
 class ConfiguredApplication(object):
@@ -319,7 +306,7 @@ class ConfiguredApplication(object):
         self.arg_parser = arg_parser # We own this now.
 
         self.arg_parser.add_argument("config_list", nargs="+")
-        (args, opts) = self.arg_parser.parse_known_args(filter(lambda x: x!="--help", sys.argv[1:]))
+        (args, opts) = self.arg_parser.parse_known_args([x for x in sys.argv[1:] if x!="--help"])
 
         # We reverse it so the "little-endian" specification of the shell: default, system, user
         # will be replaced by the "big-endian" specification of function: check user, then system, then default.
