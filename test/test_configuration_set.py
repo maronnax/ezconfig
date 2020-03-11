@@ -6,7 +6,7 @@ import pdb
 import ezconfig.config
 import testdata
 from nose.tools import assert_raises
-
+import numpy
 
 def test_config_composion_interleaving():
     comp1_fn = testdata.get_comp1_test_config_filename()
