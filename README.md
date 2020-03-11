@@ -4,8 +4,7 @@ EZConfig is a package for parsing configuration files.
 
 ## Author
 
-Any comments, queries, suggestions, patches, funny jokes, donations,
-loose women, undrunk beer - please contact me at nathan.addy@windfalltechnical.com.
+nathan.addy@windfalltechnical.com.
 
 ## Installation Instructions
 

@@ -1,1 +1,3 @@
-dateutils
+python-dateutil
+numpy
+nose
