@@ -110,7 +110,7 @@ class ConfigurationFile(object):
             raise KeyError(err_msg)
 
         if not self.has(sect, key):
-            value = default
+            value = str(default)
             if value is None: return
         else:
             value = self._conf.get(sect, key)
@@ -134,6 +134,9 @@ class ConfigurationFile(object):
             value = self._strip_comment(value)
 
         if is_list:
+            value = re.sub(r"^\s*[\[\(]\s*", "", value)
+            value = re.sub(r"[\]\)]\s*$", "", value)
+
             if value == "" or value == "()" or value == "[]":
                 value_list = []
             else:
