@@ -18,7 +18,13 @@ up: | ./venv/bin/python ## Install tool dependencies in a virtualenv
 	# Install nose for testing
 	./venv/bin/pip install sphinx sphinx-autobuild
 
+
+# See `https://widdowquinn.github.io/coding/update-pypi-package/' for
+# latest pypi upload info I reference.
 pipy-upload:
-	python setup.py sdist upload -r pipy
+	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+test-pipy-upload:
+	python -m twine upload dist/*
 
 .PHONY: test doc
