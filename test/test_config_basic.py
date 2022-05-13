@@ -179,3 +179,27 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get(SECTION, "key_negative_float_is_true", type=bool) == True
 
         return
+
+
+
+    def test_list_behavior(self):
+        test_fn = testdata.get_default_test_config_filename()
+        config = ezconfig.config.Configuration(test_fn)
+
+        SECTION = "list_tests"
+
+        assert config.get(SECTION, "list1", is_list=True) == ["a", "b", "c"]
+        assert config.get(SECTION, "list2", is_list=True) == ["a", "b", "c"]
+        assert config.get(SECTION, "list3", is_list=True) == ["a", "b", "c"]
+        assert config.get(SECTION, "list4", is_list=True) == ["1", "2", "3"]
+        assert config.get(SECTION, "list5", is_list=True) == ["1", "2", "3"]
+
+        assert config.get(SECTION, "list4", is_list=True, type=int) == [1,2,3]
+        assert config.get(SECTION, "list5", is_list=True, type=int) == [1,2,3]
+
+        assert config.get(SECTION, "NOEXISTO", is_list=True, type=int, default=[1,2,3]) == [1,2,3]
+
+
+
+
+        return

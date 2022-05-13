@@ -19,12 +19,18 @@ up: | ./venv/bin/python ## Install tool dependencies in a virtualenv
 	./venv/bin/pip install sphinx sphinx-autobuild
 
 
+
+dist-files:
+	python setup.py sdist bdist_wheel
+
+
 # See `https://widdowquinn.github.io/coding/update-pypi-package/' for
 # latest pypi upload info I reference.
-pipy-upload:
+pipy-upload: dist-files
+	python -m twine upload dist/*
+
+test-pipy-upload: dist-files
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
-test-pipy-upload:
-	python -m twine upload dist/*
 
 .PHONY: test doc

@@ -110,8 +110,9 @@ class ConfigurationFile(object):
             raise KeyError(err_msg)
 
         if not self.has(sect, key):
-            value = str(default)
+            value = default
             if value is None: return
+            if not isinstance(value, str): return value
         else:
             value = self._conf.get(sect, key)
 
