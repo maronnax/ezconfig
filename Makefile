@@ -27,10 +27,10 @@ dist-files:
 
 # See `https://widdowquinn.github.io/coding/update-pypi-package/' for
 # latest pypi upload info I reference.
-pipy-upload: dist-files
+pypi-upload: dist-files
 	python -m twine upload dist/*
 
-test-pipy-upload: dist-files
+test-pypi-upload: dist-files
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 
