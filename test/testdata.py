@@ -14,3 +14,10 @@ def get_comp2_test_config_filename():
 
 def get_comp3_test_config_filename():
     return os.path.join(get_test_directory(), "conf3.conf")
+
+
+def get_conf_configuration_set_defaults1():
+    return os.path.join(get_test_directory(), "conf_multidef1.conf")
+
+def get_conf_configuration_set_defaults2():
+    return os.path.join(get_test_directory(), "conf_multidef2.conf")

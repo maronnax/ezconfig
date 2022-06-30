@@ -7,7 +7,7 @@ import ezconfig.config
 import testdata
 from nose.tools import assert_raises
 
-def test_config_composion_interleaving():
+def test_config_composition_interleaving():
     comp1_fn = testdata.get_comp1_test_config_filename()
     comp2_fn = testdata.get_comp2_test_config_filename()
     comp3_fn = testdata.get_comp3_test_config_filename()
@@ -124,3 +124,21 @@ def test_config_composion_interleaving():
     for p in perms:
         assert config(*p).get_key_help("1and2", "value") == "A long and great help message"
         assert config(*p).get_key_help("2and3", "value") == "A different help message only found once"
+
+
+
+def test_configuration_set_defaults():
+    comp1_fn = testdata.get_conf_configuration_set_defaults1()
+    comp2_fn = testdata.get_conf_configuration_set_defaults2()
+
+    conf = ezconfig.config.Configuration(comp1_fn, comp2_fn)
+    assert conf.get("test_stuff", "value1", type=float, mandatory=True) == 100.0
+    assert conf.get("test_stuff", "value1", type=float, mandatory=False) == 100.0
+    assert conf.get("test_stuff", "value1", type=float) == 100.0
+
+    assert conf.get("test_stuff", "value1", type=float, mandatory=False, default=200) == 100.0
+    assert conf.get("test_stuff", "value2", type=float) == 102.0
+    assert conf.get("test_stuff", "value2", type=float, mandatory=True) == 102.0
+    assert conf.get("test_stuff", "value2", type=float, mandatory=False) == 102.0
+
+    assert conf.get("test_stuff", "value2", type=float, mandatory=True, default=200) == 102.0

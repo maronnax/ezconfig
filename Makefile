@@ -21,6 +21,7 @@ up: | ./venv/bin/python ## Install tool dependencies in a virtualenv
 
 
 dist-files:
+	rm dist/*
 	python setup.py sdist bdist_wheel
 
 
