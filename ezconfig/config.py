@@ -290,7 +290,9 @@ class Configuration(object):
             self._config_list[0].get(*args, mandatory=True)
 
         section, key = args[:2]
-        potential_values = [x for x in [conf.get(*args, **dict(list(kwds.items()) + list({"mandatory": False}.items()))) for conf in self._config_list] if x is not None]
+
+        potential_values = [conf.get(*args, **{**kwds, "mandatory": False, "default": None}) for conf in self._config_list]
+        potential_values = [x for x in potential_values if x is not None]
 
         if potential_values:
             return potential_values[0]
