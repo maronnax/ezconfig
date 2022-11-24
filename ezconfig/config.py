@@ -128,6 +128,8 @@ class ConfigurationFile(object):
 
     def parse_string(self, value, type=False, is_filename=False, is_timedelta=False, is_datetime=False,
                      is_list=False, raw=False, is_int_hex_str=False, is_code=False):
+        if raw:
+            return value
 
         # Because of the refactor the caller can potentially put a default value in here and
         # we need to handle it.
