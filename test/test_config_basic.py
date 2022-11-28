@@ -65,7 +65,7 @@ class TestConfigBasic(unittest.TestCase):
 
         f = config.get("conversions", "val11", is_code=True)
         assert f(1) == 2
-        assert config.get("conversions", "val11", raw=True) == "lambda x: x * 2"
+        assert config.get("conversions", "val11", raw=True) == "lambda x: x * 2 # With comment"
 
 
 
@@ -140,7 +140,7 @@ class TestConfigBasic(unittest.TestCase):
         test_fn = testdata.get_default_test_config_filename()
         config = ezconfig.config.Configuration(test_fn)
 
-        assert config.get("static_stuff", "test_fn", raw=True) == "../testdata/default.conf"
+        assert config.get("static_stuff", "test_fn", raw=True) == "../testdata/default.conf   # A comment"
         assert config.get("static_stuff", "test_fn", static=True) == test_fn
         assert config.get("static_stuff", "test_file", static=True) == test_fn
         assert config.get("static_stuff", "test_var", static=True) == "../testdata/default.conf"
