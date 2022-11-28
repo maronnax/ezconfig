@@ -67,6 +67,14 @@ class TestConfigBasic(unittest.TestCase):
         assert f(1) == 2
         assert config.get("conversions", "val11", raw=True) == "lambda x: x * 2"
 
+
+
+        assert config.get("raw_values", "val1", raw=True) == "rawval"
+        assert config.get("raw_values", "val2", raw=True) == "rawval # With a comment"
+        assert config.get("raw_values", "val3", raw=True) == "rawval       # With whitespace"
+        assert config.get("raw_values", "val4_trailingwhitespace", raw=True) == "rawval#123"
+
+
         assert config.get("conversions", "val_hex1", is_int_hex_str=True) == 10
         assert config.get("conversions", "val_hex2", is_int_hex_str=True) == 16
         assert config.get("conversions", "val_hex_array", is_list=True, is_int_hex_str=True) == [10, 16]
