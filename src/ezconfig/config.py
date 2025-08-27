@@ -15,7 +15,7 @@ __author__ = "Nathan Addy <nathan.addy@gmail.com>"
 Provide the Configuration class for the application
 """
 
-MANDATORY_PLUS_DEFAULT_ERROR_MSG = "mandotory cannot be true while default is not None"
+MANDATORY_PLUS_DEFAULT_ERROR_MSG = "mandatory cannot be true while default is not None"
 STATIC_WITH_OTHER_PARAMS_ERROR_MSG = "static=True must not be passed with other parameters"
 
 def _convert_to_integer(obj):
@@ -286,75 +286,3 @@ class Configuration(object):
 
     def has(sect, key):
         return True in [ez.has(sect, key) for ez in self._config_list]
-
-
-class ConfiguredApplication(object):
-
-    DEFAULT_LOG_FORMAT = "%(levelname)s %(asctime)-15s %(name)s: %(message)s"
-
-    def __init__(self, arg_parser):
-        self.arg_parser = arg_parser # We own this now.
-
-        self.arg_parser.add_argument("config_list", nargs="+")
-        (args, opts) = self.arg_parser.parse_known_args([x for x in sys.argv[1:] if x!="--help"])
-
-        # We reverse it so the "little-endian" specification of the shell: default, system, user
-        # will be replaced by the "big-endian" specification of function: check user, then system, then default.
-        self.config = Configuration(*reversed(args.config_list))
-
-        self._add_arguments()
-
-        self.opts = self.arg_parser.parse_args()
-        self._parse_class_options()
-
-    def _add_arguments(self, conf_variables=None):
-      if conf_variables == None:
-        conf_variables = self.config.variables()
-
-        for (section, key) in conf_variables:
-            # The static param indicates that filename variables are
-            # to be considered statically typed and identified from
-            # the key name, deduced from whether the key name
-            # ends with "_file" (one of the default patterns in
-            # ezconfig).
-
-            # This buys us the ability to set the absolute path as the
-            # default, so the user sees a useful value, as opposed to
-            # a potentially relative path in a file the user has no
-            # way of knowing.
-            config_val = self.config.get(section, key, static=True)
-            self.arg_parser.add_argument(self.config_arg_param_arg_name(section, key),
-                                         dest=self.config_arg_param_var_name(section, key),
-                                         default=config_val,
-                                         help = "{} (Default: {})".format(self.config.get_key_help(section, key), config_val))
-
-        # for (section, key) in self.config.variables():
-        #     self.arg_parser.add_argument("--{}/{}".format(section, key),
-        #                                  default=self.config.get(section, key),
-        #                                  help = self.config.get_key_help(section, key))
-        return
-
-    def config_arg_param_arg_name(self, section, key):
-        return "--{}/{}".format(section, key)
-
-    def config_arg_param_var_name(self, section, key):
-        return "{}___{}".format(section, key) # 3 underscores *just in case* someone uses 2 underscores in
-                                              # a configuration variable somewhere.
-
-
-    def get_param_value(self, section, key, **kwds):
-        # We capture this value because the configuration has already
-        # reported in absolute path the value it holds. So if we get a
-        # relative path, it comes from the command line and should be
-        # relative to getcwd.
-
-        rawstr = vars(self.opts)[self.config_arg_param_var_name(section, key)]
-
-        if "is_filename" in kwds:
-            kwds.pop("is_filename")
-            value = self.config.parse_string(rawstr, **kwds)
-            value = os.path.abspath(value)
-        else:
-            value = self.config.parse_string(rawstr, **kwds)
-
-        return value

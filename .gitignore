@@ -7,4 +7,5 @@ doc/_build
 .venv
 .coverage
 .python-version
+__pycache__
 *~
