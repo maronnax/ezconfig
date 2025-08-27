@@ -65,13 +65,6 @@ class ConfigurationFile(object):
                                                                        self._conf.items(sec))),
                                                       self._conf.sections())))
 
-    # Do not want to enable this for now, as this returns the raw values and is this not at all EZ.
-    # def items(self):
-    #     return list(itertools.chain.from_iterable(map(lambda sec: (map(lambda (var,val): (sec, var, val),
-    #                                                                    self._conf.items(sec))),
-    #                                                   self._conf.sections())))
-
-
     def get(self, sect, key, default=None, mandatory=True,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
             is_list=False, raw=False, is_int_hex_str=False, is_code=False):

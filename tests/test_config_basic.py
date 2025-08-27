@@ -2,11 +2,17 @@ from datetime import datetime
 import os
 
 import ezconfig.config
-#from nose.tools import assert_raises # Not working for some reason
 import testdata
 import unittest
 
 class TestConfigBasic(unittest.TestCase):
+
+    def test_file_opening_closing(self):
+        test_fn = testdata.get_default_test_config_filename()
+        config = ezconfig.config.Configuration(test_fn)
+        assert config is not None
+
+        return
 
     def test_basic_config(self):
         test_fn = testdata.get_default_test_config_filename()
@@ -58,8 +64,8 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get("conversions", "val6", is_timedelta=True) == 3600
         assert config.get("conversions", "val7", is_timedelta=True) == (3 * 24 * 3600)
         assert config.get("conversions", "val77", is_timedelta=True) == (3 * 7 * 24 * 3600)
-        assert config.get("conversions", "val8", is_filename=True) == test_fn
-        assert config.get("conversions", "val9", is_filename=True) == test_fn
+        assert config.get("conversions", "val8", is_filename=True) == str(test_fn)
+        assert config.get("conversions", "val9", is_filename=True) == str(test_fn)
         assert config.get("conversions", "val10", is_filename=True) == "/usr/bin/env"
         assert config.get("conversions", "val10", is_filename=True) == "/usr/bin/env"
 

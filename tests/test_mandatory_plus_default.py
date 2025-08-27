@@ -3,7 +3,6 @@ import os
 
 import pdb
 import ezconfig.config
-#from nose.tools import assert_raises # Not working for some reason
 import testdata
 import unittest
 
