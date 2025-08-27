@@ -6,6 +6,12 @@ EZConfig is a package for parsing configuration files.
 
 nathan.addy@windfalltechnical.com.
 
+## Updating to a vaguely modern word
+Works on 3.7, 3.8
+
+
+
+
 ## Installation Instructions
 
 Install with pip using

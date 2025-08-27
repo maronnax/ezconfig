@@ -1,5 +1,12 @@
 #include ./doc/Makefile
 
+new:
+	rm -fr .venv
+	uv venv
+	#uv pip install -r requirements.txt
+	uv pip install -e ".[dev"]
+	#uv run nosetests -s test
+
 test:
 	nosetests -s test
 
@@ -32,6 +39,5 @@ pypi-upload: dist-files
 
 test-pypi-upload: dist-files
 	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-
 
 .PHONY: test doc

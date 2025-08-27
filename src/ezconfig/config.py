@@ -194,7 +194,7 @@ class ConfigurationFile(object):
         help_key = value[ value.index("##") + 2: ].strip()
 
         help_key = help_key.replace("##", "")
-        help_key = re.sub("\W+", " ", help_key)
+        help_key = re.sub(r"\W+", " ", help_key)
         return help_key
 
     @staticmethod
