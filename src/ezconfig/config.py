@@ -74,7 +74,7 @@ class ConfigurationFile(object):
 
     def get(self, sect, key, default=None, mandatory=True,
             type=False, is_filename=False, is_timedelta=False, is_datetime=False,
-            is_list=False, raw=False, is_int_hex_str=False, is_code=False, static=False):
+            is_list=False, raw=False, is_int_hex_str=False, is_code=False):
 
         '''Primary class method for reading values in the configuration file.
 
@@ -100,11 +100,6 @@ class ConfigurationFile(object):
                  matches `STATIC_FILENAME_KEY_INDICATORS`, in which case filename=True is used.
         '''
 
-        # NJA-TAG check this...
-        if static == True and [x for x in (type, is_filename, is_timedelta, is_code,
-                                                       is_int_hex_str, raw) if False]:
-            raise ValueError(STATIC_WITH_OTHER_PARAMS_ERROR_MSG)
-
         if mandatory and not self.has(sect, key):
             err_msg = "Missing configuration exception '{0}::{1}'".format(sect, key)
             raise KeyError(err_msg)
@@ -115,12 +110,6 @@ class ConfigurationFile(object):
             if not isinstance(value, str): return value
         else:
             value = self._conf.get(sect, key)
-
-        if static:
-            if [fnend for fnend in STATIC_FILENAME_KEY_INDICATORS if key.strip().endswith(fnend)]:
-                return self.parse_string(value, is_filename = True)
-            else:
-                return self._strip_comment(value)
 
         return self.parse_string(value, type, is_filename, is_timedelta, is_datetime,
                                  is_list, raw, is_int_hex_str, is_code)
