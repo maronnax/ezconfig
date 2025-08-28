@@ -16,7 +16,6 @@ Provide the Configuration class for the application
 """
 
 MANDATORY_PLUS_DEFAULT_ERROR_MSG = "mandatory cannot be true while default is not None"
-STATIC_WITH_OTHER_PARAMS_ERROR_MSG = "static=True must not be passed with other parameters"
 
 def _convert_to_integer(obj):
   try:
@@ -31,7 +30,6 @@ def _convert_string_to_bool(string):
     return float(string) != 0.0
 
 
-STATIC_FILENAME_KEY_INDICATORS = ["_fn", "_file"]
 class ConfigurationFile(object):
 
     '''Represents a configuration object that holds values in the form
@@ -88,9 +86,6 @@ class ConfigurationFile(object):
         is_int_hex_str: This is a string that specifies an integer in either decimal
                         or hex.  E.g. "193" (decimal) or "0xc1" both return the 193.
         raw - do not do any variable substitutions when extracting the value
-
-        static - if set to true the class will act as though the field is raw unless the key
-                 matches `STATIC_FILENAME_KEY_INDICATORS`, in which case filename=True is used.
         '''
 
         if mandatory and not self.has(sect, key):
@@ -284,5 +279,5 @@ class Configuration(object):
             return self._config_list[0].get(*args, **kwds) # This will throw if mandatory=True
 
 
-    def has(sect, key):
+    def has(self, sect, key):
         return True in [ez.has(sect, key) for ez in self._config_list]

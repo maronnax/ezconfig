@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ezconfig"
-version = "1.7.0"
+version = "1.9.1"
 requires-python = ">=3.9"
 
 dependencies = [
@@ -19,6 +19,8 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
+    "build>=0.7.0",
+    "twine>=4.0.0",
     "ipython",
     "emacsipython",
     "sphinx",

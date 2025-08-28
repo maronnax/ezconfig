@@ -1,28 +1,18 @@
 #include ./doc/Makefile
 
-new:
+venv:
 	rm -fr .venv
 	uv venv
 	uv pip install -e ".[dev"]
 
-
-
-
 dist-files:
-	rm dist/*
-	python setup.py sdist bdist_wheel
+	rm -rf dist/
+	python -m build
 
-# See `https://widdowquinn.github.io/coding/update-pypi-package/' for
-# latest pypi upload info I reference.
 pypi-upload: dist-files
-	python -m twine upload dist/*
+	python -m twine upload dist/* --repository ezconfig
 
 test-pypi-upload: dist-files
-	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-
-
-
-
-
+	python -m twine upload dist/* --repository ezconfig-test
 
 .PHONY: test doc
