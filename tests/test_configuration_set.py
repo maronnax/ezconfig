@@ -5,7 +5,7 @@ import copy
 import pdb
 import ezconfig.config
 import testdata
-from nose.tools import assert_raises
+import pytest
 
 def test_config_composition_interleaving():
     comp1_fn = testdata.get_comp1_test_config_filename()
@@ -75,11 +75,11 @@ def test_config_composition_interleaving():
         ["only2", "1and2", "2and3", "common", "only3", "1and3", "only1"]
 
     MISSING_KEY="a missing key"
-    with assert_raises(KeyError):
+    with pytest.raises(KeyError):
         config().get("conversions", MISSING_KEY, mandatory=True)
 
 
-    with assert_raises(KeyError):
+    with pytest.raises(KeyError):
         config().get("conversions", MISSING_KEY,
                  default="Mandatory is mandatory dude.",
                  mandatory=True)
@@ -89,13 +89,13 @@ def test_config_composition_interleaving():
 
     assert config().get("common", "value", mandatory=True) == "conf1_val"
     assert config().get("2and3", "value", mandatory=True) == "conf2_val"
-    with assert_raises(KeyError):
+    with pytest.raises(KeyError):
         config().get("conversions", MISSING_KEY, mandatory=True)
 
-    with assert_raises(KeyError):
+    with pytest.raises(KeyError):
         config().get(MISSING_SECTION, MISSING_KEY, mandatory=True)
 
-    with assert_raises(KeyError):
+    with pytest.raises(KeyError):
         config().get(MISSING_SECTION, MISSING_KEY, mandatory=True, default="a thing")
 
     answers = {

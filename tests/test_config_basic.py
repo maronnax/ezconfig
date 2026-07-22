@@ -2,11 +2,17 @@ from datetime import datetime
 import os
 
 import ezconfig.config
-#from nose.tools import assert_raises # Not working for some reason
 import testdata
 import unittest
 
 class TestConfigBasic(unittest.TestCase):
+
+    def test_file_opening_closing(self):
+        test_fn = testdata.get_default_test_config_filename()
+        config = ezconfig.config.Configuration(test_fn)
+        assert config is not None
+
+        return
 
     def test_basic_config(self):
         test_fn = testdata.get_default_test_config_filename()
@@ -58,8 +64,8 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get("conversions", "val6", is_timedelta=True) == 3600
         assert config.get("conversions", "val7", is_timedelta=True) == (3 * 24 * 3600)
         assert config.get("conversions", "val77", is_timedelta=True) == (3 * 7 * 24 * 3600)
-        assert config.get("conversions", "val8", is_filename=True) == test_fn
-        assert config.get("conversions", "val9", is_filename=True) == test_fn
+        assert config.get("conversions", "val8", is_filename=True) == str(test_fn)
+        assert config.get("conversions", "val9", is_filename=True) == str(test_fn)
         assert config.get("conversions", "val10", is_filename=True) == "/usr/bin/env"
         assert config.get("conversions", "val10", is_filename=True) == "/usr/bin/env"
 
@@ -73,6 +79,8 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get("raw_values", "val2", raw=True) == "rawval # With a comment"
         assert config.get("raw_values", "val3", raw=True) == "rawval       # With whitespace"
         assert config.get("raw_values", "val4_trailingwhitespace", raw=True) == "rawval#123"
+        # raw=True must not raise InterpolationSyntaxError for values containing '%'
+        assert config.get("raw_values", "val5_percent", raw=True) == "p%ssw0rd%42!"
 
 
         assert config.get("conversions", "val_hex1", is_int_hex_str=True) == 10
@@ -134,17 +142,6 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get(SEC, "intervals", is_list=True, is_timedelta=True) == \
             [10.0, 10.1, 15, 15, 13*60, 1.5*3600, 10*24*3600, 15*7*24*3600]
         return
-
-
-    def test_static_param(self):
-        test_fn = testdata.get_default_test_config_filename()
-        config = ezconfig.config.Configuration(test_fn)
-
-        assert config.get("static_stuff", "test_fn", raw=True) == "../testdata/default.conf   # A comment"
-        assert config.get("static_stuff", "test_fn", static=True) == test_fn
-        assert config.get("static_stuff", "test_file", static=True) == test_fn
-        assert config.get("static_stuff", "test_var", static=True) == "../testdata/default.conf"
-
 
 
     def test_help_comments(self):

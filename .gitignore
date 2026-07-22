@@ -5,3 +5,8 @@ dist
 doc/_build
 /upload_new_pip_version.instructions
 .venv
+.coverage
+.python-version
+__pycache__
+*~
+*.DS_Store

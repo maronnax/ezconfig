@@ -1,37 +1,23 @@
 #include ./doc/Makefile
 
-test:
-	nosetests -s test
+venv:
+	rm -fr .venv
+	uv venv
+	uv pip install -e ".[dev"]
 
-up: | ./venv/bin/python ## Install tool dependencies in a virtualenv
+clean:
+	rm -rf dist/ build/ *.egg-info
 
-./venv/bin/python:
-	virtualenv -p python2.7 venv
-	./venv/bin/pip install --upgrade pip
+dist-files: clean
+	rm -rf dist/
+	# python -m build
+	uv build --no-sources
 
-	# Install basic requirements
-	./venv/bin/pip install -r requirements.txt
-
-	# Install nose for testing
-	./venv/bin/pip install nose
-
-	# Install nose for testing
-	./venv/bin/pip install sphinx sphinx-autobuild
-
-
-
-dist-files:
-	rm dist/*
-	python setup.py sdist bdist_wheel
-
-
-# See `https://widdowquinn.github.io/coding/update-pypi-package/' for
-# latest pypi upload info I reference.
 pypi-upload: dist-files
-	python -m twine upload dist/*
+	python -m twine upload dist/* --repository ezconfig
 
 test-pypi-upload: dist-files
-	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	#python -m twine upload dist/* --repository ezconfig-test
+	uv publish --index testpypi
 
-
-.PHONY: test doc
+.PHONY: test doc clean dist-files

@@ -11,9 +11,9 @@ nathan.addy@windfalltechnical.com.
 Install with pip using
     ```pip install ezconfig```
 
-The latest development version is on bitbucket and you can install
+The latest development version is on github and you can install
 it using
-    ```pip install git+https://bitbucket.org/nathanaddy/ezconfig.git```
+    ```pip install git+https://github.com/maronnax/ezconfig.git```
 
 ## Package Features
 
