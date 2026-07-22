@@ -13,10 +13,12 @@ license = { text = "MIT" }
 authors = [{ name = "Nathan Addy", email = "nathan.addy@windfalltechnical.com" }]
 
 
-
 dependencies = [
    "python-dateutil",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ezconfig"]
 
 [project.optional-dependencies]
 dev = [
