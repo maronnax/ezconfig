@@ -97,7 +97,7 @@ class ConfigurationFile(object):
             if value is None: return
             if not isinstance(value, str): return value
         else:
-            value = self._conf.get(sect, key)
+            value = self._conf.get(sect, key, raw=raw)
 
         return self.parse_string(value, type, is_filename, is_timedelta, is_datetime,
                                  is_list, raw, is_int_hex_str, is_code)

@@ -9,3 +9,4 @@ doc/_build
 .python-version
 __pycache__
 *~
+*.DS_Store

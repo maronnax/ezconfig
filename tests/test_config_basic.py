@@ -79,6 +79,8 @@ class TestConfigBasic(unittest.TestCase):
         assert config.get("raw_values", "val2", raw=True) == "rawval # With a comment"
         assert config.get("raw_values", "val3", raw=True) == "rawval       # With whitespace"
         assert config.get("raw_values", "val4_trailingwhitespace", raw=True) == "rawval#123"
+        # raw=True must not raise InterpolationSyntaxError for values containing '%'
+        assert config.get("raw_values", "val5_percent", raw=True) == "p%ssw0rd%42!"
 
 
         assert config.get("conversions", "val_hex1", is_int_hex_str=True) == 10

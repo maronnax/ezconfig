@@ -5,8 +5,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ezconfig"
-version = "1.9.1"
+version = "1.9.3"
+description = "useful extensions for configparser.ConfigParser"
+readme = "README.md"
 requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Nathan Addy", email = "nathan.addy@windfalltechnical.com" }]
+
+
 
 dependencies = [
    "python-dateutil",
@@ -68,3 +74,10 @@ addopts = [
     "--cov=ezconfig",
     "--cov-report=term-missing",
 ]
+
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
